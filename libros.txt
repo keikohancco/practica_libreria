@@ -1,0 +1,135 @@
+using System;
+using System.Data.SqlClient;
+
+class Program
+{
+    static string connectionString = "Data Source=.;Initial Catalog=BD_PRACTICA;User ID=wilfv;Password=12345";
+
+    // Método para registrar un nuevo cliente
+    static void RegistrarCliente(string nombre, string genero)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            string query = "INSERT INTO Clientes (Nombre, Genero) VALUES (@Nombre, @Genero)";
+            SqlCommand command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@Nombre", nombre);
+            command.Parameters.AddWithValue("@Genero", genero);
+
+            connection.Open();
+            int rowsAffected = command.ExecuteNonQuery();
+            connection.Close();
+
+            Console.WriteLine("Cliente registrado correctamente.");
+        }
+    }
+
+    // Método para registrar una nueva venta
+    static void RegistrarVenta(int idCliente, int idLibro, int cantidad, decimal importeBruto, decimal montoDescuento, decimal importeNeto)
+    {
+        using (SqlConnection connection = new SqlConnection(connectionString))
+        {
+            string query = "INSERT INTO Ventas (ID_Cliente, ID_Libro, Cantidad, Importe_Bruto, Monto_Descuento, Importe_Neto) " +
+                           "VALUES (@ID_Cliente, @ID_Libro, @Cantidad, @Importe_Bruto, @Monto_Descuento, @Importe_Neto)";
+            SqlCommand command = new SqlCommand(query, connection);
+            command.Parameters.AddWithValue("@ID_Cliente", idCliente);
+            command.Parameters.AddWithValue("@ID_Libro", idLibro);
+            command.Parameters.AddWithValue("@Cantidad", cantidad);
+            command.Parameters.AddWithValue("@Importe_Bruto", importeBruto);
+            command.Parameters.AddWithValue("@Monto_Descuento", montoDescuento);
+            command.Parameters.AddWithValue("@Importe_Neto", importeNeto);
+
+            connection.Open();
+            int rowsAffected = command.ExecuteNonQuery();
+            connection.Close();
+
+            Console.WriteLine("Venta registrada correctamente.");
+        }
+    }
+
+    // Método para calcular el porcentaje de descuento en función de la cantidad y el tipo de libro
+    static decimal CalcularDescuento(int cantidad, int tipoLibro)
+    {
+        decimal descuento = 0;
+
+        switch (tipoLibro)
+        {
+            case 1: // Ficción
+                if (cantidad <= 2)
+                    descuento = 0.05m;
+                else if (cantidad <= 6)
+                    descuento = 0.06m;
+                else if (cantidad > 7)
+                    descuento = 0.08m;
+                else
+                    descuento = 0.02m;
+                break;
+            case 2: // Novelas
+                if (cantidad <= 2)
+                    descuento = 0.08m;
+                else if (cantidad <= 6)
+                    descuento = 0.16m;
+                else if (cantidad > 7)
+                    descuento = 0.32m;
+                else
+                    descuento = 0.08m;
+                break;
+            case 3: // Cuentos
+                if (cantidad <= 2)
+                    descuento = 0.09m;
+                else if (cantidad <= 6)
+                    descuento = 0.16m;
+                else if (cantidad > 7)
+                    descuento = 0.36m;
+                else
+                    descuento = 0.32m;
+                break;
+            case 4: // Física Cuántica
+                if (cantidad <= 2)
+                    descuento = 0.2m;
+                else if (cantidad <= 6)
+                    descuento = 0.2m;
+                else if (cantidad > 7)
+                    descuento = 0.4m;
+                else
+                    descuento = 0.2m;
+                break;
+        }
+
+        return descuento;
+    }
+
+    // Método para calcular el importe neto de la venta
+    static decimal CalcularImporteNeto(int cantidad, decimal precio, decimal descuento)
+    {
+        decimal importeBruto = cantidad * precio;
+        decimal montoDescuento = importeBruto * descuento;
+        decimal importeNeto = importeBruto - montoDescuento;
+        return importeNeto;
+    }
+
+    static void Main(string[] args)
+    {
+        // Registro de un nuevo cliente
+        Console.WriteLine("Ingrese el nombre del cliente:");
+        string nombre = Console.ReadLine();
+        Console.WriteLine("Ingrese el género del cliente:");
+        string genero = Console.ReadLine();
+        RegistrarCliente(nombre, genero);
+
+        // Registro de una nueva venta (debes completar los datos de la venta)
+        Console.WriteLine("Ingrese el ID del cliente:");
+        int idCliente = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Ingrese el ID del libro:");
+        int idLibro = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Ingrese la cantidad de libros:");
+        int cantidad = Convert.ToInt32(Console.ReadLine());
+        Console.WriteLine("Ingrese el precio del libro:");
+        decimal precio = Convert.ToDecimal(Console.ReadLine());
+        Console.WriteLine("Ingrese el tipo de libro (1-Ficción / 2-Novelas / 3-Cuentos / 4-Física Cuántica):");
+        int tipoLibro = Convert.ToInt32(Console.ReadLine());
+        decimal descuento = CalcularDescuento(cantidad, tipoLibro);
+        decimal importeNeto = CalcularImporteNeto(cantidad, precio, descuento);
+        Console.WriteLine("Importe Neto: " + importeNeto);
+        RegistrarVenta(idCliente, idLibro, cantidad, cantidad * precio, cantidad * precio * descuento, importeNeto);
+    }
+}
